@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>לוח חוגים שבועי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800;900&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-warm: #FDF8F4;
+    --bg-cool: #F0EBF8;
+    --shadow-soft: 0 8px 40px rgba(80,40,120,0.08);
+    --shadow-hover: 0 4px 16px rgba(80,40,120,0.14);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Rubik', 'Segoe UI', sans-serif;
+    background: linear-gradient(155deg, var(--bg-warm) 0%, #FFF 35%, var(--bg-cool) 100%);
+    min-height: 100vh;
+    direction: rtl;
+    color: #2D3748;
+    padding: 24px 16px 40px;
+  }
+
+  /* ── Header ── */
+  .header { text-align: center; margin-bottom: 20px; animation: fadeUp .6s ease both; }
+  .header-icon { font-size: 42px; margin-bottom: 2px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.1)); }
+  .header h1 {
+    font-family: 'Secular One', 'Rubik', sans-serif;
+    font-size: 32px; font-weight: 400;
+    background: linear-gradient(135deg, #6B46C1, #D53F8C, #DD6B20);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header .sub { color: #A0AEC0; font-size: 13px; margin-top: 4px; font-weight: 600; }
+  .header .sub .saved { color: #38A169; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    max-width: 1120px; margin: 0 auto 14px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    align-items: center; justify-content: center;
+    animation: fadeUp .7s ease both;
+  }
+  .toolbar input {
+    padding: 10px 14px; border-radius: 10px;
+    border: 2px solid #E2D6F3; font-size: 14px;
+    width: 155px; outline: none; background: #FFF;
+    font-family: 'Rubik', sans-serif; direction: rtl;
+    transition: border .2s;
+  }
+  .toolbar input:focus { border-color: #B794F4; box-shadow: 0 0 0 3px rgba(128,90,213,.12); }
+  .add-child-btn {
+    padding: 10px 20px; border-radius: 10px;
+    background: linear-gradient(135deg, #6B46C1, #9F7AEA);
+    color: #FFF; font-weight: 800; border: none; cursor: pointer;
+    font-size: 14px; font-family: 'Rubik', sans-serif;
+    box-shadow: 0 4px 16px rgba(107,70,193,.3);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .add-child-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(107,70,193,.4); }
+  .sep { width: 1px; height: 26px; background: #E2D6F3; }
+  .tb {
+    padding: 8px 14px; border-radius: 10px; border: 1.5px solid #E2D6F3;
+    background: #FFF; color: #666; font-weight: 700; font-size: 13px;
+    cursor: pointer; font-family: 'Rubik', sans-serif;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all .2s;
+  }
+  .tb:hover { background: #F5F0FF; border-color: #B794F4; color: #6B46C1; }
+
+  /* ── Share Banner ── */
+  .share-banner {
+    max-width: 1120px; margin: 0 auto 14px;
+    background: linear-gradient(135deg, #EBF4FF, #F3E8FF66);
+    border-radius: 12px; padding: 12px 16px;
+    border: 1.5px solid #C4B5FD55;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: #553C9A; line-height: 1.6;
+    animation: fadeUp .8s ease both;
+  }
+  .share-banner strong { color: #6B46C1; }
+  .share-banner .icon { font-size: 20px; flex-shrink: 0; }
+
+  /* ── Status ── */
+  .status-bar {
+    max-width: 1120px; margin: 0 auto 10px; border-radius: 10px;
+    padding: 8px 16px; font-size: 13px; font-weight: 600;
+    text-align: center; animation: fadeUp .3s ease both;
+  }
+  .status-success { background: #C6F6D5; color: #276749; }
+  .status-error { background: #FED7D7; color: #9B2C2C; }
+  .status-loading { background: #BEE3F8; color: #2A4365; }
+
+  /* ── Table Container ── */
+  .table-wrap {
+    max-width: 1120px; margin: 0 auto; overflow-x: auto;
+    border-radius: 18px; box-shadow: var(--shadow-soft);
+    -webkit-overflow-scrolling: touch;
+    animation: fadeUp .9s ease both;
+  }
+  table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: #FFF; border-radius: 18px; overflow: hidden;
+  }
+  thead th {
+    padding: 14px 10px; font-weight: 800; font-size: 14px;
+    text-align: center; color: #FFF; letter-spacing: .2px;
+    position: relative;
+  }
+  thead th.name-col {
+    background: linear-gradient(135deg, #1A202C, #4A5568);
+    position: sticky; right: 0; z-index: 10; min-width: 88px;
+  }
+  tbody td {
+    padding: 10px 6px; vertical-align: top;
+    border-bottom: 1px solid #F0EBE3; transition: background .2s;
+    min-width: 108px;
+  }
+  tbody td:hover { background: rgba(0,0,0,.015); }
+  tbody td.name-cell {
+    font-weight: 800; font-size: 14px; text-align: center;
+    position: sticky; right: 0; z-index: 5; min-width: 88px;
+  }
+
+  /* ── Activity Tag ── */
+  .act-tag {
+    border-radius: 10px; padding: 6px 10px; margin-bottom: 5px;
+    position: relative; transition: transform .15s;
+  }
+  .act-tag:hover { transform: translateY(-1px); }
+  .act-tag .act-name { font-weight: 700; font-size: 13px; margin-bottom: 1px; }
+  .act-tag .act-hours { font-size: 11px; direction: ltr; text-align: center; opacity: .75; }
+  .act-tag .remove-act {
+    position: absolute; top: -6px; left: -6px;
+    background: #E53E3E; color: #FFF; border: 2px solid #FFF;
+    border-radius: 50%; width: 20px; height: 20px;
+    font-size: 11px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .2s; line-height: 1;
+  }
+  .act-tag:hover .remove-act { opacity: .85; }
+  .act-tag .remove-act:hover { opacity: 1; }
+
+  /* ── Add Button ── */
+  .add-act-btn {
+    border-radius: 50%; width: 26px; height: 26px;
+    font-size: 16px; cursor: pointer; display: inline-flex;
+    align-items: center; justify-content: center;
+    transition: all .2s; line-height: 1; padding: 0; margin-top: 3px;
+  }
+  .add-act-btn:hover { transform: scale(1.15); box-shadow: var(--shadow-hover); }
+
+  /* ── Name Cell Actions ── */
+  .name-actions { display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .name-actions .child-name { cursor: pointer; }
+  .name-actions .del-child {
+    background: none; border: none; color: #E53E3E66;
+    cursor: pointer; font-size: 12px; padding: 0 2px; transition: color .2s;
+  }
+  .name-actions .del-child:hover { color: #E53E3E; }
+  .edit-name-input {
+    width: 62px; padding: 3px 5px; border-radius: 6px;
+    font-size: 13px; text-align: center; outline: none;
+    direction: rtl; font-family: 'Rubik', sans-serif;
+  }
+
+  /* ── Popup ── */
+  .popup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.3);
+    z-index: 999; display: flex; align-items: center; justify-content: center;
+    animation: fadeIn .15s ease;
+  }
+  .popup {
+    background: #FFF; border-radius: 18px; padding: 22px;
+    min-width: 280px; max-width: 90vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    direction: rtl; animation: popIn .2s ease;
+  }
+  .popup h3 { font-size: 16px; margin-bottom: 12px; }
+  .popup input.pop-text {
+    width: 100%; padding: 10px 12px; border-radius: 10px;
+    font-size: 14px; outline: none; box-sizing: border-box;
+    font-family: 'Rubik', sans-serif; margin-bottom: 10px;
+  }
+  .popup .submit-btn {
+    width: 100%; padding: 10px 0; border-radius: 10px;
+    color: #FFF; font-weight: 700; border: none;
+    cursor: pointer; font-size: 14px; font-family: 'Rubik', sans-serif;
+    margin-top: 6px;
+  }
+  .popup .time-row {
+    display: flex; gap: 6px; align-items: center; margin-bottom: 12px;
+    direction: ltr;
+  }
+  .popup .time-row label {
+    font-size: 12px; font-weight: 700; color: #666; min-width: 28px;
+    text-align: center; direction: rtl; flex-shrink: 0;
+  }
+  .popup select {
+    flex: 1; padding: 10px 6px; border-radius: 10px;
+    font-size: 14px; outline: none; box-sizing: border-box;
+    font-family: 'Rubik', sans-serif; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background: #FFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat left 10px center;
+    text-align: center; direction: ltr;
+    min-width: 0;
+  }
+  .popup select:focus { box-shadow: 0 0 0 3px rgba(128,90,213,.12); }
+  .popup .time-sep { font-size: 18px; font-weight: 700; color: #A0AEC0; padding: 0 2px; flex-shrink: 0; }
+  .popup .cancel-link {
+    display: block; text-align: center; margin-top: 10px;
+    color: #A0AEC0; font-size: 12px; cursor: pointer;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center; margin-top: 16px; color: #A0AEC0;
+    font-size: 11px; line-height: 1.8;
+  }
+
+  /* ── Empty State ── */
+  .empty-state { text-align: center; padding: 50px 20px; color: #A0AEC0; font-size: 16px; }
+
+  /* ── Animations ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
+
+  /* ── Print ── */
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #FFF !important; padding: 10px; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .table-wrap { box-shadow: none; }
+    .act-tag .remove-act { display: none !important; }
+    .add-act-btn { display: none !important; }
+    .header h1 { -webkit-text-fill-color: #6B46C1; }
+  }
+
+  /* ── Tablet / Mobile ── */
+  @media (max-width: 768px) {
+    body { padding: 14px 8px 30px; }
+    .header h1 { font-size: 26px; }
+    thead th, tbody td { padding: 8px 4px !important; min-width: 88px !important; font-size: 12px; }
+    .toolbar input { width: 130px; }
+    .share-banner { font-size: 12px; padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">📅</div>
+  <h1>לוח חוגים שבועי</h1>
+  <div class="sub" id="subHeader"></div>
+</div>
+
+<div class="toolbar no-print" id="toolbar">
+  <input type="text" id="newChildInput" placeholder="שם הילד/ה..." />
+  <button class="add-child-btn" onclick="addChild()">+ ילד/ה</button>
+  <div class="sep"></div>
+  <button class="tb" onclick="window.print()">🖨️ הדפסה</button>
+  <button class="tb" onclick="exportJSON()">📤 ייצוא</button>
+  <button class="tb" onclick="importJSON()">📥 ייבוא</button>
+  <button class="tb" onclick="resetData()">🔄 אתחול</button>
+</div>
+
+<div class="share-banner no-print">
+  <span class="icon">📂</span>
+  <div>
+    <strong>Google Drive:</strong>
+    שמרו קובץ זה בתיקייה משותפת. כל מי שפותח אותו יכול לערוך ולייצא.
+    שינויים נשמרים בדפדפן של כל משתמש.
+    כדי לסנכרן — ייצאו JSON ושתפו אותו בתיקייה.
+  </div>
+</div>
+
+<div id="statusWrap" class="no-print"></div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th class="name-col">👦 שם</th>
+        <th style="background:linear-gradient(135deg,#E53E3E,#FC8181)">יום ראשון</th>
+        <th style="background:linear-gradient(135deg,#DD6B20,#F6AD55)">יום שני</th>
+        <th style="background:linear-gradient(135deg,#D69E2E,#F6E05E)">יום שלישי</th>
+        <th style="background:linear-gradient(135deg,#38A169,#68D391)">יום רביעי</th>
+        <th style="background:linear-gradient(135deg,#3182CE,#63B3ED)">יום חמישי</th>
+        <th style="background:linear-gradient(135deg,#6B46C1,#B794F4)">יום שישי</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="footer no-print">
+  💡 לחצו על שם ילד/ה כדי לערוך · לחצו + להוספת חוג · ✕ להסרה
+</div>
+
+<!-- Popup container -->
+<div id="popupOverlay" class="popup-overlay" style="display:none" onclick="closePopupOutside(event)">
+  <div class="popup" id="popupBox"></div>
+</div>
+
+<script>
+const DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
+const STORAGE_KEY = "kids_schedule_v2";
+
+const COLORS = [
+  { bg:"#FFF5F5", accent:"#C53030", light:"#FED7D7", tag:"#FC8181" },
+  { bg:"#F0FFF4", accent:"#276749", light:"#C6F6D5", tag:"#68D391" },
+  { bg:"#EBF8FF", accent:"#2B6CB0", light:"#BEE3F8", tag:"#63B3ED" },
+  { bg:"#FAF5FF", accent:"#6B46C1", light:"#E9D8FD", tag:"#B794F4" },
+  { bg:"#FFFAF0", accent:"#C05621", light:"#FEEBC8", tag:"#F6AD55" },
+  { bg:"#F0FFFF", accent:"#285E61", light:"#B2F5EA", tag:"#4FD1C5" },
+  { bg:"#FFF5F7", accent:"#B83280", light:"#FED7E2", tag:"#F687B3" },
+  { bg:"#FFFFF0", accent:"#975A16", light:"#FEFCBF", tag:"#F6E05E" },
+];
+
+const DEFAULT_DATA = [
+  { id:1, name:"יוסי", activities:{ "ראשון":[{name:"כדורגל",hours:"16:00-17:00"}], "שלישי":[{name:"פסנתר",hours:"17:00-18:00"}], "חמישי":[{name:"שחייה",hours:"15:00-16:00"}] }},
+  { id:2, name:"נועה", activities:{ "שני":[{name:"בלט",hours:"16:30-17:30"}], "רביעי":[{name:"ציור",hours:"15:00-16:00"}], "שישי":[{name:"ג'ודו",hours:"10:00-11:00"}] }},
+  { id:3, name:"אדם", activities:{ "ראשון":[{name:"קראטה",hours:"17:00-18:00"}], "שני":[{name:"גיטרה",hours:"16:00-17:00"}], "רביעי":[{name:"כדורסל",hours:"18:00-19:00"}], "חמישי":[{name:"שחמט",hours:"15:00-16:00"}] }},
+  { id:4, name:"מאיה", activities:{ "שני":[{name:"התעמלות",hours:"16:00-17:00"}], "שלישי":[{name:"חליל",hours:"17:30-18:30"}], "חמישי":[{name:"דרמה",hours:"16:00-17:30"}] }},
+];
+
+let children = [];
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { children = JSON.parse(raw); }
+    else { children = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+  } catch { children = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+  render();
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(children)); } catch {}
+}
+
+function showStatus(msg, type) {
+  const w = document.getElementById("statusWrap");
+  w.innerHTML = `<div class="status-bar status-${type}">${msg}</div>`;
+  setTimeout(() => { w.innerHTML = ""; }, 2500);
+}
+
+function countActivities() {
+  return children.reduce((s,c) => s + Object.values(c.activities).reduce((a,b) => a+b.length, 0), 0);
+}
+
+function updateSubHeader() {
+  const el = document.getElementById("subHeader");
+  el.innerHTML = `${children.length} ילדים · ${countActivities()} חוגים`;
+}
+
+function sortAllActivities() {
+  children.forEach(child => {
+    Object.keys(child.activities).forEach(day => {
+      child.activities[day].sort((a, b) => {
+        const ta = a.hours.split('-')[0] || '00:00';
+        const tb = b.hours.split('-')[0] || '00:00';
+        return ta.localeCompare(tb);
+      });
+    });
+  });
+}
+
+function render() {
+  sortAllActivities();
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  if (children.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">הוסיפו ילד/ה כדי להתחיל 🎨</td></tr>`;
+    updateSubHeader();
+    return;
+  }
+
+  children.forEach((child, ri) => {
+    const c = COLORS[ri % COLORS.length];
+    const tr = document.createElement("tr");
+    tr.style.animation = `fadeUp .45s ease ${ri*0.06}s both`;
+
+    // Name cell
+    const nameTd = document.createElement("td");
+    nameTd.className = "name-cell";
+    nameTd.style.background = `linear-gradient(135deg, ${c.bg}, ${c.light}88)`;
+    nameTd.style.color = c.accent;
+    nameTd.style.borderBottom = `1px solid ${c.light}`;
+    nameTd.innerHTML = `
+      <div class="name-actions">
+        <span class="child-name" onclick="startEditName(${child.id})" title="ערוך שם">${child.name}</span>
+        <button class="del-child no-print" onclick="deleteChild(${child.id})" title="הסר">🗑</button>
+      </div>`;
+    tr.appendChild(nameTd);
+
+    // Day cells
+    DAYS.forEach(day => {
+      const td = document.createElement("td");
+      td.style.borderLeft = "1px solid #F0EBE355";
+      const acts = child.activities[day] || [];
+      if (acts.length) td.style.background = c.bg;
+
+      let html = "";
+      acts.forEach((act, ai) => {
+        html += `
+          <div class="act-tag" style="background:linear-gradient(135deg,${c.tag}30,${c.tag}18);border:1.5px solid ${c.tag}77">
+            <div class="act-name" style="color:${c.accent}">${act.name}</div>
+            <div class="act-hours" style="color:${c.accent}">${act.hours}</div>
+            <button class="remove-act no-print" onclick="removeActivity(${child.id},'${day}',${ai})" title="הסר חוג">✕</button>
+          </div>`;
+      });
+
+      html += `
+        <div style="text-align:center" class="no-print">
+          <button class="add-act-btn" onclick="openAddPopup(${child.id},'${day}')"
+            style="background:linear-gradient(135deg,${c.light},${c.tag}44);color:${c.accent};border:1.5px dashed ${c.tag}88"
+            title="הוסף חוג">+</button>
+        </div>`;
+
+      td.innerHTML = html;
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  updateSubHeader();
+  save();
+}
+
+// ── Actions ──
+
+function addChild() {
+  const input = document.getElementById("newChildInput");
+  const name = input.value.trim();
+  if (!name) return;
+  children.push({ id: Date.now(), name, activities: {} });
+  input.value = "";
+  render();
+}
+
+document.getElementById("newChildInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") addChild();
+});
+
+function deleteChild(id) {
+  children = children.filter(c => c.id !== id);
+  render();
+}
+
+function startEditName(id) {
+  const child = children.find(c => c.id === id);
+  if (!child) return;
+  const cell = event.target.closest("td");
+  cell.innerHTML = `<input class="edit-name-input" style="border:1.5px solid ${COLORS[children.indexOf(child)%COLORS.length].accent}"
+    value="${child.name}" onkeydown="if(event.key==='Enter')saveEditName(${id},this.value)" onblur="saveEditName(${id},this.value)" autofocus />`;
+  cell.querySelector("input").focus();
+}
+
+function saveEditName(id, val) {
+  const name = val.trim();
+  if (name) {
+    const child = children.find(c => c.id === id);
+    if (child) child.name = name;
+  }
+  render();
+}
+
+function removeActivity(childId, day, idx) {
+  const child = children.find(c => c.id === childId);
+  if (!child || !child.activities[day]) return;
+  child.activities[day].splice(idx, 1);
+  if (!child.activities[day].length) delete child.activities[day];
+  render();
+}
+
+// ── Popup ──
+
+function generateTimeOptions(selectedVal) {
+  let opts = '';
+  for (let h = 7; h <= 21; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const val = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+      const sel = val === selectedVal ? ' selected' : '';
+      opts += `<option value="${val}"${sel}>${val}</option>`;
+    }
+  }
+  return opts;
+}
+
+function openAddPopup(childId, day) {
+  const child = children.find(c => c.id === childId);
+  const ci = children.indexOf(child);
+  const c = COLORS[ci % COLORS.length];
+
+  const box = document.getElementById("popupBox");
+  box.innerHTML = `
+    <h3 style="color:${c.accent}">הוספת חוג – ${child.name} (יום ${day})</h3>
+    <input id="popActName" class="pop-text" placeholder="שם החוג" style="border:1.5px solid ${c.tag}88;direction:rtl" autofocus />
+    <div class="time-row">
+      <label>מ-</label>
+      <select id="popTimeStart" style="border:1.5px solid ${c.tag}88" onchange="autoSetEndTime()">
+        ${generateTimeOptions('16:00')}
+      </select>
+      <span class="time-sep">→</span>
+      <label>עד</label>
+      <select id="popTimeEnd" style="border:1.5px solid ${c.tag}88">
+        ${generateTimeOptions('17:00')}
+      </select>
+    </div>
+    <button class="submit-btn" style="background:linear-gradient(135deg,${c.accent},${c.tag})" onclick="submitPopup()">הוסף ✓</button>
+    <span class="cancel-link" onclick="closePopup()">ביטול</span>
+  `;
+  box.dataset.childId = childId;
+  box.dataset.day = day;
+  document.getElementById("popupOverlay").style.display = "flex";
+  setTimeout(() => document.getElementById("popActName").focus(), 50);
+}
+
+function autoSetEndTime() {
+  const startSel = document.getElementById("popTimeStart");
+  const endSel = document.getElementById("popTimeEnd");
+  const [h, m] = startSel.value.split(':').map(Number);
+  const endH = h + 1;
+  const endVal = String(endH).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  // Set end to start+1h if valid
+  for (let i = 0; i < endSel.options.length; i++) {
+    if (endSel.options[i].value === endVal) { endSel.selectedIndex = i; return; }
+  }
+}
+
+function submitPopup() {
+  const name = document.getElementById("popActName").value.trim();
+  const start = document.getElementById("popTimeStart").value;
+  const end = document.getElementById("popTimeEnd").value;
+  if (!name) return;
+  if (end <= start) { alert("שעת הסיום חייבת להיות אחרי שעת ההתחלה"); return; }
+  const hours = start + '-' + end;
+  const box = document.getElementById("popupBox");
+  const childId = parseInt(box.dataset.childId);
+  const day = box.dataset.day;
+  const child = children.find(c => c.id === childId);
+  if (!child) return;
+  if (!child.activities[day]) child.activities[day] = [];
+  child.activities[day].push({ name, hours });
+  closePopup();
+  render();
+}
+
+function closePopup() {
+  document.getElementById("popupOverlay").style.display = "none";
+}
+
+function closePopupOutside(e) {
+  if (e.target === document.getElementById("popupOverlay")) closePopup();
+}
+
+// ── Export / Import ──
+
+function exportJSON() {
+  const blob = new Blob(
+    [JSON.stringify({ children, exportedAt: new Date().toISOString() }, null, 2)],
+    { type: "application/json" }
+  );
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "kids-schedule-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showStatus("הקובץ יוצא בהצלחה! שמרו אותו בתיקייה המשותפת ב-Google Drive 📂", "success");
+}
+
+function importJSON() {
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = ".json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = (ev) => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        if (d.children && Array.isArray(d.children)) {
+          children = d.children;
+          render();
+          showStatus("הנתונים יובאו בהצלחה ✓", "success");
+        } else { throw new Error("bad"); }
+      } catch { showStatus("שגיאה בקריאת הקובץ", "error"); }
+    };
+    r.readAsText(file);
+  };
+  input.click();
+}
+
+function resetData() {
+  if (confirm("לאתחל את הנתונים לברירת המחדל?")) {
+    children = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    render();
+    showStatus("הנתונים אותחלו 🔄", "success");
+  }
+}
+
+// ── Init ──
+load();
+</script>
+</body>
+</html>
